@@ -1,6 +1,11 @@
 import requests
 from requests.exceptions import HTTPError
-from user import User
+from model.transaction import Transaction
+from model.user import User
+from model.balanceUpdate import BalanceUpdate
+from model.auth import Auth
+from model.logout import Logout
+
 BASE_URL = "http://localhost:8000"
 
 
@@ -24,10 +29,31 @@ def login_user(username, password):
             print("Invalid Credentials")
             return None
 
-def logout_user(token: str):
+def logout_user(token: Auth):
         url = f"{BASE_URL}/login/"
-        responseString  = requests.delete(url, json=token)
+        logout = Logout(authToken=Auth(**token).token)
+        responseString  = requests.delete(url, json=logout.dict())
         return readResponse(responseString)
+
+def editBalance(token: Auth, amount: int):
+    url = f"{BASE_URL}/bank/"
+    update = BalanceUpdate(authToken = Auth(**token).token, amount=amount)
+    try:
+        responseString = requests.put(url, json=update.dict())
+        return readResponse(responseString)
+    except Exception as err:
+        print("Could Not Authenticate")
+        return None
+
+def transaction(token: Auth, recipient: str, amount: int):
+    url = f"{BASE_URL}/bank/"
+    transaction = Transaction(authToken = Auth(**token).token, recipient=recipient, amount=amount)    
+    try:
+        responseString = requests.post(url, json=transaction.dict())
+        return readResponse(responseString)
+    except Exception as err:
+        print("Could Not Authenticate")
+        return None
 
 def readResponse(responseString):
     response = responseString.json()

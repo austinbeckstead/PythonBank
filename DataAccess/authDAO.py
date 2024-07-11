@@ -1,5 +1,5 @@
 import uuid
-from auth import Auth;
+from model.auth import Auth;
 
 class AuthDAO:
     def __init__(self):
